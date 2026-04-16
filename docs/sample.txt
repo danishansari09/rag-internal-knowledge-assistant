@@ -1,0 +1,16 @@
+PROJECT OVERVIEW: GLOBAL INVENTORY SYNCHRONIZATION (GIS)
+The GIS project aims to automate the data flow between the European Logistics Hub (ELH) and the Central ERP system. Currently, the synchronization occurs via a legacy middleware called 'BridgeConnect v2.1'.
+
+SECTION 1: DATA EXTRACTION PROTOCOLS
+Data is pulled from the ELH Oracle database every 6 hours using a specialized SQL view named 'vw_export_master'. The extraction includes three key parameters: SKU_ID, Stock_Level, and Last_Audit_Date. If the 'Last_Audit_Date' is older than 48 hours, the system triggers a manual flag for the Warehouse Supervisor, Sarah Jenkins, to perform a physical count.
+
+SECTION 2: TRANSFORMATION AND SECURITY
+Once extracted, data is converted into an encrypted Parquet format. The encryption uses the AES-256 standard. During this phase, a Python script (clean_data.py) removes any duplicate entries based on the SKU_ID. It is critical that no PII (Personally Identifiable Information) is included in the Parquet files to comply with GDPR regulations.
+
+SECTION 3: LOADING INTO SNOWFLAKE
+The encrypted files are uploaded to an AWS S3 bucket (s3://gis-data-prod-eu). From there, a Snowflake Snowpipe automatically ingests the data into the 'RAW_INVENTORY' table. If the ingestion fails, an automated alert is sent to the DevOps On-Call rotation via PagerDuty.
+
+SECTION 4: KNOWN ISSUES AND TROUBLESHOOTING
+1. High Latency: Often caused by network congestion between the ELH Hub and the AWS Frankfurt region.
+2. Null Values: If SKU_ID is null, the record is discarded and logged in 'error_log_table'.
+3. Authentication Errors: Usually occur when the IAM Role 'GIS_S3_Reader' loses permissions.
