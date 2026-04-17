@@ -4,9 +4,9 @@ from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from openai import OpenAI
-from rag_agent import RAGAgent
+from langchain_rag import RAGAgent
 import keycredentials
-
+import get_response_rag
 app = Flask(__name__)
 
 CORS(
@@ -26,8 +26,8 @@ CORS(
 )
 
 HF_TOKEN = keycredentials.hf_token
-HF_MODEL = keycredentials.hf_model
-
+HF_MODEL = keycredentials.hf_model_llm
+HF_MODEL_EMBEDDING = keycredentials.hf_model_embedding
 if not HF_TOKEN:
     raise RuntimeError("HF_TOKEN is not set in the environment")
 
@@ -35,7 +35,10 @@ client = OpenAI(
     base_url="https://router.huggingface.co/v1",
     api_key=HF_TOKEN,
 )
-
+from embedding import EmbeddingBuilder
+from langchain_community.vectorstores import Chroma
+embeddings = EmbeddingBuilder.build_embeddings(HF_MODEL_EMBEDDING, HF_TOKEN)
+vectorstore = Chroma(persist_directory="./chroma_db", embedding_function=embeddings, collection_name="internal_docs")
 RAG_DOCUMENTS = [
     {
         "name": "generative_ai_sample_for_rag.pdf",
@@ -49,27 +52,13 @@ RAG_DOCUMENTS = [
         "summary": "Sample operational workflow covering global inventory synchronization, extraction, security, loading, and troubleshooting steps.",
         "path": "./docs/sample.txt",
     },
+    {
+        "name": "LLM Powered Autonomous Agents - Html Page",
+        "type": "WEB",
+        "summary": "Overview of LLM-powered autonomous agents and their applications.",
+        "path": "https://lilianweng.github.io/posts/2023-06-23-agent/"
+    }
 ]
-
-# Initialize only once
-rag = RAGAgent(
-    hf_model=HF_MODEL,
-    hf_key=HF_TOKEN
-)
-
-# Load documents once
-loaded_documents = []
-for doc in RAG_DOCUMENTS:
-    if doc["type"] == "PDF":
-        loaded_documents.extend(rag.load_pdf(doc["path"]))
-    else:
-        loaded_documents.extend(rag.load_txt(doc["path"]))
-
-# Split and create vector store once
-all_chunks = rag.split_docs(loaded_documents)
-vector_store = rag.create_vector_store(all_chunks)
-retriever = vector_store.as_retriever()
-rag.set_retriever(retriever)
 
 @app.get("/health")
 def health():
@@ -159,7 +148,8 @@ def rag_qa():
         return jsonify({'error': 'Question is required'}), 400
 
     try:
-        answer = rag.rag_qa(question)
+        #answer = rag_agent.rag_qa(question)
+        answer = get_response_rag.rag_qa(question, vectorstore)
         return jsonify({
             'status': 'ok',
             'answer': answer,
@@ -171,4 +161,4 @@ def rag_qa():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=False)
+    app.run(host="127.0.0.1", port=5500, debug=False)
