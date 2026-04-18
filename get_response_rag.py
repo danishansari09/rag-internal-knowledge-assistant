@@ -1,6 +1,6 @@
 import os
 from embedding import EmbeddingBuilder
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_core.runnables import RunnablePassthrough
 from prompt import PromptBuilder
 from openai import OpenAI
@@ -13,9 +13,7 @@ hf_key = keycredentials.hf_token
 hf_model_llm = keycredentials.hf_model_llm
 
 def rag_qa(query: str, vectorstore: Chroma) -> str:
-    # embeddings = EmbeddingBuilder.build_embeddings(hf_mdodel_embedding, hf_key)
     llm_model = llm(hf_model_llm, hf_key)
-    # vectorstore = Chroma(persist_directory="./chroma_db", embedding_function=embeddings, collection_name="internal_docs")
     retriever = vectorstore.as_retriever()
     relevant_docs = retriever.invoke(query)
     prompt = PromptBuilder.build_prompt()

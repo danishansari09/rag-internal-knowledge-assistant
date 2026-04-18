@@ -1,4 +1,5 @@
-from langchain_community.vectorstores import Chroma # For creating a vector store for retrieval
+from langchain_chroma import Chroma # For creating a vector store for retrieval
+from pathlib import Path # For handling file paths
 
 class VectorStore:
     @staticmethod
@@ -15,5 +16,15 @@ class VectorStore:
             persist_directory=str(persist_path),
             collection_name="internal_docs"
         )
-        vectorstore.persist()
         return vectorstore
+    
+    @staticmethod
+    def load_vector_store(embed_model, persist_directory: Path) -> Chroma:
+        """
+        Load an existing store from disk.
+        """
+        return Chroma(
+            persist_directory=str(persist_directory),
+            embedding_function=embed_model,
+            collection_name="internal_docs"
+        )

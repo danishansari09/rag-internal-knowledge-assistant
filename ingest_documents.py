@@ -12,6 +12,7 @@ HF_KEY = keycredentials.hf_token
 DATA_PATH = Path("./docs")
 DATA_CHROMA_DIR = Path("./chroma_db")
 TEXT_EXTENSIONS = {".txt"}
+HTML_URL = "https://lilianweng.github.io/posts/2023-06-23-agent/"
 
 def main():
     vector_store = None
@@ -25,6 +26,17 @@ def main():
             document = loader.load_txt(str(file_path))
             loaded_documents.extend(document)
             # print(f"Loaded {len(document)} documents from {file_path.name}")
+        else:
+            document = loader.load_pdf(str(file_path))
+            loaded_documents.extend(document)
+            print(f"Loaded {len(document)} documents from {file_path.name}")
+
+    # Load web page content
+    if HTML_URL:
+        print(f"Loading web page: {HTML_URL}")
+        web_docs = loader.load_webpages(HTML_URL)
+        loaded_documents.extend(web_docs)
+        print(f"Loaded {len(web_docs)} documents from web page: {HTML_URL}")    
 
     #====================Split the loaded documents into chunks=========================
     all_chunks = []
@@ -36,16 +48,19 @@ def main():
     #====================embed the chunks using HuggingFace Embeddings and create a vector store=========================
     embedder = EmbeddingBuilder.build_embeddings(HF_MODEL_EMBEDDING, HF_KEY)
     
-    if  DATA_CHROMA_DIR.exists():
+    if  not DATA_CHROMA_DIR.exists():
         # print("Creating data directory for Chroma vector store...")
         DATA_CHROMA_DIR.mkdir(parents=True, exist_ok=True)
         # print(f"Loading existing vector store from: {DATA_CHROMA_DIR.resolve()}")
         vector_store = VectorStore.create_vector_store(all_chunks, embedder, DATA_CHROMA_DIR)
+    else:
+        vector_store = VectorStore.load_vector_store(embedder, DATA_CHROMA_DIR)
     
-    #====================Set up the retriever for the RAG Agent=========================
+    #====================To test retrieval =========================
     # retriever = Retriever()
     # print("Retriever is set up and ready to use.")
-    # docs = retriever.retrieve(vector_store, "Based on the text, what is the purpose of the MNR-4?")
+    # retriever = vector_store.as_retriever()
+    # docs = retriever.invoke("What is generative AI?")
     # print(f"Retrieved {len(docs)} documents")
     # for d in docs:
     #     print(f"Document content: {d.page_content}...")  # Print a preview of the retrieved document
