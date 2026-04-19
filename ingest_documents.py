@@ -1,3 +1,9 @@
+#==========================Document Ingestion Script===========================
+# This script is responsible for ingesting documents into the RAG agent's knowledge base. 
+# It loads documents from specified sources (text files, PDF files, and web pages), splits them into smaller chunks for better retrieval performance, generates embeddings for the chunks using HuggingFace models, and creates a vector store for efficient retrieval. 
+# The script also includes a test retrieval section to verify that the retriever is set up correctly and can retrieve relevant documents based on a sample query. 
+# This ingestion process is crucial for ensuring that the RAG agent has access to the necessary information to provide accurate and relevant responses to user queries.
+
 from pathlib import Path
 from loader import loader
 from splitter import TextSplitter
@@ -32,15 +38,15 @@ def main():
             print(f"Loaded {len(document)} documents from {file_path.name}")
 
     # Load web page content
-    if HTML_URL:
-        print(f"Loading web page: {HTML_URL}")
-        web_docs = loader.load_webpages(HTML_URL)
-        loaded_documents.extend(web_docs)
-        print(f"Loaded {len(web_docs)} documents from web page: {HTML_URL}")    
+    # if HTML_URL:
+    #     print(f"Loading web page: {HTML_URL}")
+    #     web_docs = loader.load_webpages(HTML_URL)
+    #     loaded_documents.extend(web_docs)
+    #     print(f"Loaded {len(web_docs)} documents from web page: {HTML_URL}")    
 
     #====================Split the loaded documents into chunks=========================
     all_chunks = []
-    splitter = TextSplitter(chunk_size=300, chunk_overlap=30)
+    splitter = TextSplitter(chunk_size=2000, chunk_overlap=200)
     for doc in loaded_documents:
         chunks = splitter.split_text([doc])
         all_chunks.extend(chunks)

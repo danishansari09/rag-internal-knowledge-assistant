@@ -1,3 +1,9 @@
+#==========================Main Application Script===========================
+# This script defines the main Flask application for the RAG agent. It sets up the API endpoints for health checks, testing, retrieving RAG documents, and handling chat and RAG QA requests. 
+# The application uses the HuggingFace OpenAI client to generate responses based on user messages and integrates the RAG agent's functionality to provide answers based on retrieved documents. 
+# The script also includes CORS configuration to allow requests from specified origins and handles error cases gracefully by returning appropriate JSON responses. 
+# This main application script is essential for exposing the RAG agent's capabilities through a web API, allowing users to interact with the agent and receive relevant responses based on their queries. 
+# It serves as the entry point for the RAG agent and orchestrates the various components defined in the other modules to create a cohesive and functional application.
 import os
 from datetime import datetime, timezone
 

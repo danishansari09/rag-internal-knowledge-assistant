@@ -1,3 +1,7 @@
+#==========================Embedding Builder Module===========================
+# This module defines the EmbeddingBuilder class, which is responsible for generating embeddings for the documents using HuggingFace models. 
+# It provides a static method to initialize the HuggingFaceEmbeddings with the specified model and authentication key.
+
 from langchain_huggingface import HuggingFaceEmbeddings # For generating embeddings using HuggingFace models
 
 class EmbeddingBuilder:

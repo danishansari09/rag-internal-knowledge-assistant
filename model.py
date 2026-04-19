@@ -1,3 +1,7 @@
+#==========================LLM Module===========================
+# This module defines the llm class, which is responsible for generating responses using a language model. The class initializes an OpenAI client with the specified HuggingFace model and authentication key. 
+# It has a method to generate a response based on a given prompt by invoking the chat completions API of the OpenAI client. The generated response is returned as a string after stripping any leading or trailing whitespace.
+
 from openai import OpenAI
 
 class llm:
