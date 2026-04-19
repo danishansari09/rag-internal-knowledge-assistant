@@ -14,9 +14,22 @@ class PromptBuilder:
         """
         Create a prompt template for the RAG Agent.
         """
-        prompt_template = """"You are a helpful assistant for danish-ansari.com. 
-        You are an assistant for answering questions based on the retrieved documents. 
-        Use only the following retrieved documents to answer the question. If you don't know the answer, say you don't know.
+        prompt_template = """You are a grounded question-answering assistant.
+
+                                Answer the user's question using only the provided context.
+                                Write the answer in a natural and direct way.
+                                Do not say phrases like:
+                                - according to document
+                                - based on document
+                                - quoted from document
+                                - the provided context states
+
+                                Do not mention document numbers in the answer.
+
+                                If the answer is supported by the context, answer clearly and concisely.
+                                If the context is insufficient, say so briefly.
+
+                                Use the context for grounding, but do not copy its formatting unless necessary.
 
         {context}
 

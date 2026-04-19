@@ -4,7 +4,7 @@
 
 #==========================Importing Required Libraries===========================
 from langchain_text_splitters import RecursiveCharacterTextSplitter # For splitting documents into chunks
-from pre_processing import clean_text_content # For cleaning up text by removing extra spaces and newlines
+from pre_processing import process_text_document # For cleaning up text by removing extra spaces and newlines
 from langchain_core.documents import Document # For working with document objects
 
 #==========================Text Splitter Definition===========================
@@ -21,8 +21,13 @@ class TextSplitter:
     # Split documents into chunks for better retrieval
     def split_text(self, documents) -> list:
         # Clean each document before splitting
-        cleaned_documents = [clean_text_content(doc.page_content) for doc in documents]
-        print(cleaned_documents[0])  # Print the cleaned content of the first document for verification
+        cleaned_documents = [process_text_document(doc.page_content) for doc in documents]
+        # print(cleaned_documents)  # Print the cleaned content of the first document for verification
         # Create new Document objects with cleaned content
-        cleaned_docs = [Document(page_content=content) for content in cleaned_documents]
+        #cleaned_docs = [Document(page_content=content) for content in cleaned_documents]
+        cleaned_docs = []
+        for content in cleaned_documents:
+            cleaned_docs.append(Document(page_content=content.get("text", "")))  # Use get to avoid KeyError if "text" is missing
+        #print(cleaned_docs)  # Print the cleaned Document objects for verification
+        # Split the cleaned documents into chunks using the splitter    
         return self.splitter.split_documents(cleaned_docs)
