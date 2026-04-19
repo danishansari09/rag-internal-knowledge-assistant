@@ -1,7 +1,7 @@
 #==========================Text Splitter Module===========================
 # This module defines the TextSplitter class, which is responsible for splitting documents into smaller chunks for better retrieval performance in the RAG agent. #
 # It uses the RecursiveCharacterTextSplitter from LangChain to split the text based on specified chunk size and overlap. The module also includes a function to clean the
-
+# text by removing extra spaces and newlines before splitting. This ensures that the chunks are well-formed and can be effectively used for embedding and retrieval in the RAG agent.
 #==========================Importing Required Libraries===========================
 from langchain_text_splitters import RecursiveCharacterTextSplitter # For splitting documents into chunks
 from pre_processing import process_text_document # For cleaning up text by removing extra spaces and newlines
