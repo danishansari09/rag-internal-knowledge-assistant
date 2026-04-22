@@ -9,6 +9,7 @@ class Retriever:
     def retrieve(self, query: str) -> list:        
         return self.retriever.invoke(query)
     
+    # The following methods are used to format the sources for display in the final response, including deduplication of sources based on metadata.
     def format_source_label(self, doc, idx: int) -> str:
         """
         Build a clean citation label from LangChain Document metadata.
