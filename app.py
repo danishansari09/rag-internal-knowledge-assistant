@@ -6,13 +6,14 @@
 # It serves as the entry point for the RAG agent and orchestrates the various components defined in the other modules to create a cohesive and functional application.
 import os
 from datetime import datetime, timezone
-
+from langchain_chroma import Chroma
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from openai import OpenAI
 from langchain_rag import RAGAgent
 import keycredentials
 import get_response_rag
+import ingest_documents
 app = Flask(__name__)
 
 CORS(
@@ -26,11 +27,12 @@ CORS(
                 "http://127.0.0.1:5500",
                 "http://localhost:8000",
                 "http://127.0.0.1:8000",
+                "http://localhost:5300",
             ]
         }
     },
 )
-
+vectorstore =ingest_documents.main()
 HF_TOKEN = keycredentials.hf_token
 HF_MODEL = keycredentials.hf_model_llm
 HF_MODEL_EMBEDDING = keycredentials.hf_model_embedding
@@ -43,8 +45,8 @@ client = OpenAI(
 )
 from embedding import EmbeddingBuilder
 from langchain_community.vectorstores import Chroma
-embeddings = EmbeddingBuilder.build_embeddings(HF_MODEL_EMBEDDING, HF_TOKEN)
-vectorstore = Chroma(persist_directory="./chroma_db", embedding_function=embeddings, collection_name="internal_docs")
+# embeddings = EmbeddingBuilder.build_embeddings(HF_MODEL_EMBEDDING, HF_TOKEN)
+# vectorstore = Chroma(persist_directory="./chroma_db", embedding_function=embeddings, collection_name="internal_docs")
 RAG_DOCUMENTS = [
     {
         "name": "generative_ai_sample_for_rag.pdf",
@@ -154,17 +156,18 @@ def rag_qa():
         return jsonify({'error': 'Question is required'}), 400
 
     try:
-        #answer = rag_agent.rag_qa(question)
-        answer = get_response_rag.rag_qa(question, vectorstore)
+        #result = get_response_rag.rag_qa(question, vectorstore)
+        result = get_response_rag.debug_retrieval(question, vectorstore)
         return jsonify({
             'status': 'ok',
-            'answer': answer,
-            'documents_used': [doc['name'] for doc in RAG_DOCUMENTS],
+            'answer': result["answer"],
+            'documents_used': result["sources"],
             'time_utc': datetime.now(timezone.utc).isoformat(),
-        })
+        }), 200
+
     except Exception as e:
         app.logger.exception("Error while processing /api/ragqa")
         return jsonify({'error': str(e)}), 500
-
+    
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5500, debug=False)

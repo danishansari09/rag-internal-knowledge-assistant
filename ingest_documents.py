@@ -21,6 +21,7 @@ TEXT_EXTENSIONS = {".txt"}
 HTML_URL = "https://lilianweng.github.io/posts/2023-06-23-agent/"
 
 def main():
+    print("Starting document ingestion process...")
     vector_store = None
     retriever = None
     #============load documents from the data path===========================
@@ -35,7 +36,7 @@ def main():
         else:
             document = loader.load_pdf(str(file_path))
             loaded_documents.extend(document)
-            print(f"Loaded {len(document)} documents from {file_path.name}")
+            #print(f"Loaded {len(document)} documents from {file_path.name}")
 
     # Load web page content
     # if HTML_URL:
@@ -46,21 +47,28 @@ def main():
 
     #====================Split the loaded documents into chunks=========================
     all_chunks = []
-    splitter = TextSplitter(chunk_size=2000, chunk_overlap=200)
+    splitter = TextSplitter(chunk_size=800, chunk_overlap=120)
     for doc in loaded_documents:
         chunks = splitter.split_text([doc])
         all_chunks.extend(chunks)
     
+    # Debugging: Print loaded documents and chunks
+    # print(f"Loaded docs: {len(loaded_documents)}")
+    # print(f"Total chunks: {len(all_chunks)}")
+    # for i, chunk in enumerate(all_chunks):
+    #     print(f"\n--- Chunk {i+1} ---")
+    #     print(chunk.page_content[:400])
+    #     print(getattr(chunk, "metadata", {}))
     #====================embed the chunks using HuggingFace Embeddings and create a vector store=========================
     embedder = EmbeddingBuilder.build_embeddings(HF_MODEL_EMBEDDING, HF_KEY)
     
-    if  not DATA_CHROMA_DIR.exists():
-        # print("Creating data directory for Chroma vector store...")
-        DATA_CHROMA_DIR.mkdir(parents=True, exist_ok=True)
-        # print(f"Loading existing vector store from: {DATA_CHROMA_DIR.resolve()}")
-        vector_store = VectorStore.create_vector_store(all_chunks, embedder, DATA_CHROMA_DIR)
-    else:
+    if DATA_CHROMA_DIR.exists():
         vector_store = VectorStore.load_vector_store(embedder, DATA_CHROMA_DIR)
+        VectorStore.add_documents(vector_store, all_chunks)
+    else:
+        vector_store = VectorStore.create_vector_store(all_chunks, embedder, DATA_CHROMA_DIR)
+
+    return vector_store
     
     #====================To test retrieval =========================
     # retriever = Retriever()

@@ -5,35 +5,35 @@
 # The PromptBuilder class has a static method that returns a PromptTemplate object created from the defined template string. 
 # This module is essential for ensuring that the language model generates accurate and relevant responses based on the retrieved information.
 
-from langchain_core.prompts import PromptTemplate # For creating prompt templates
+from langchain_core.prompts import PromptTemplate
 
-#==========================Prompt Template Definition===========================
 class PromptBuilder:
     @staticmethod
     def build_prompt() -> PromptTemplate:
-        """
-        Create a prompt template for the RAG Agent.
-        """
         prompt_template = """You are a grounded question-answering assistant.
 
-                                Answer the user's question using only the provided context.
-                                Write the answer in a natural and direct way.
-                                Do not say phrases like:
-                                - according to document
-                                - based on document
-                                - quoted from document
-                                - the provided context states
+Answer the user's question using only the provided context.
 
-                                Do not mention document numbers in the answer.
+Instructions:
+- Write the answer in natural, clear, user-friendly English.
+- Answer directly. Do not say phrases like:
+  - according to document
+  - based on document
+  - quoted from document
+  - the provided context states
+- Do not mention document numbers in the answer.
+- Do not copy raw formatting from the context unless necessary.
+- Do not include quotes unless they are essential to the answer.
+- If the question asks for steps, return the steps clearly.
+- If the context does not contain enough information, say:
+  "I do not have enough information in the provided documents to answer that accurately."
 
-                                If the answer is supported by the context, answer clearly and concisely.
-                                If the context is insufficient, say so briefly.
+Context:
+{context}
 
-                                Use the context for grounding, but do not copy its formatting unless necessary.
+Question:
+{question}
 
-        {context}
-
-        Question: {question}
-        Answer:"""
-        
+Answer:
+"""
         return PromptTemplate.from_template(prompt_template)

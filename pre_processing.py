@@ -125,20 +125,23 @@ def build_text_metadata(
     headings = extract_headings(cleaned_text)
 
     metadata = {
-        "source_type": "text",
-        "source_name": source_name or (Path(source_path).name if source_path else "unknown.txt"),
-        "source_path": source_path,
-        "file_extension": Path(source_path).suffix.lower() if source_path else ".txt",
-        "title": title,
-        "headings": headings,
-        "raw_char_count": len(raw_text),
-        "clean_char_count": len(cleaned_text),
-        "line_count": len(lines),
-        "non_empty_line_count": len(non_empty_lines),
-        "paragraph_count": len(paragraphs),
-        "word_count": len(re.findall(r"\b\w+\b", cleaned_text)),
-        "sha1": hashlib.sha1(cleaned_text.encode("utf-8")).hexdigest(),
-    }
+    "doc_id": hashlib.sha1(
+        f"{source_name or ''}|{source_path or ''}|{cleaned_text}".encode("utf-8")
+    ).hexdigest(),
+    "source_type": "text",
+    "source_name": source_name or (Path(source_path).name if source_path else "unknown.txt"),
+    "source_path": source_path,
+    "file_extension": Path(source_path).suffix.lower() if source_path else ".txt",
+    "title": title,
+    "headings": headings,
+    "raw_char_count": len(raw_text),
+    "clean_char_count": len(cleaned_text),
+    "line_count": len(lines),
+    "non_empty_line_count": len(non_empty_lines),
+    "paragraph_count": len(paragraphs),
+    "word_count": len(re.findall(r"\b\w+\b", cleaned_text)),
+    "sha1": hashlib.sha1(cleaned_text.encode("utf-8")).hexdigest(),
+}
 
     return metadata
 
