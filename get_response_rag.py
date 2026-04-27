@@ -12,8 +12,8 @@ from model import llm
 from retriever import Retriever
 hf_key = keycredentials.hf_token
 hf_model_llm = keycredentials.hf_model_llm
-
-
+from vector_store import VectorStore
+from pathlib import Path
 def extract_sources(relevant_docs):
     seen = set()
     sources = []
@@ -86,3 +86,9 @@ def debug_retrieval(query: str, vectorstore, k: int = 4):
         print("Content preview:")
         print(doc.page_content[:700])
         print()
+
+# if __name__ == "__main__":
+#     DATA_CHROMA_DIR = Path("./chroma_db")
+#     print("Running debug retrieval test...")
+#     vectorstore = VectorStore.load_vector_store(None, DATA_CHROMA_DIR)
+#     debug_retrieval("What is generative AI?", vectorstore)

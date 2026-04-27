@@ -156,8 +156,8 @@ def rag_qa():
         return jsonify({'error': 'Question is required'}), 400
 
     try:
-        #result = get_response_rag.rag_qa(question, vectorstore)
-        result = get_response_rag.debug_retrieval(question, vectorstore)
+        result = get_response_rag.rag_qa(question, vectorstore)
+        # result = get_response_rag.debug_retrieval(question, vectorstore)
         return jsonify({
             'status': 'ok',
             'answer': result["answer"],

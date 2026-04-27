@@ -15,9 +15,9 @@ from retriever import Retriever
 HF_MODEL_EMBEDDING = keycredentials.hf_model_embedding
 HF_KEY = keycredentials.hf_token    
 
-DATA_PATH = Path("./docs")
+DATA_PATH = Path("./files")
 DATA_CHROMA_DIR = Path("./chroma_db")
-TEXT_EXTENSIONS = {".txt"}
+TEXT_EXTENSIONS = {".txt", ".pdf"}
 HTML_URL = "https://lilianweng.github.io/posts/2023-06-23-agent/"
 
 def main():
@@ -28,15 +28,19 @@ def main():
     loaded_documents = []
     for file_path in sorted(DATA_PATH.glob("*")):
         suffix = file_path.suffix.lower()
-        if suffix in TEXT_EXTENSIONS:
+        if suffix == ".txt":
             # print(f"Loading text file: {file_path.name}")
             document = loader.load_txt(str(file_path))
             loaded_documents.extend(document)
             # print(f"Loaded {len(document)} documents from {file_path.name}")
-        else:
+        elif suffix == ".pdf":
+            print(f"Loading PDF file: {file_path.name}")
             document = loader.load_pdf(str(file_path))
             loaded_documents.extend(document)
-            #print(f"Loaded {len(document)} documents from {file_path.name}")
+            print(f"Loaded {len(document)} documents from {file_path.name}")
+        else:
+            print(f"Skipping unsupported file: {file_path.name}")
+            continue
 
     # Load web page content
     # if HTML_URL:
@@ -47,7 +51,7 @@ def main():
 
     #====================Split the loaded documents into chunks=========================
     all_chunks = []
-    splitter = TextSplitter(chunk_size=800, chunk_overlap=120)
+    splitter = TextSplitter(chunk_size=1000, chunk_overlap=150)
     for doc in loaded_documents:
         chunks = splitter.split_text([doc])
         all_chunks.extend(chunks)
